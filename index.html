@@ -15,7 +15,9 @@ main{max-width:650px;margin:auto;padding:12px}.summary{display:grid;grid-templat
 .remove{background:#fff5f4;color:#a23;margin-top:10px;width:100%;box-shadow:none}.help{font-size:11px;color:var(--muted);line-height:1.4;margin:4px 2px 12px}
 .bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:9px 12px calc(9px + env(safe-area-inset-bottom));z-index:30}.bottom button{width:100%;background:var(--g);color:#fff}
 @media(min-width:700px){.bottom{position:static;border:0;background:transparent;padding:0;margin-bottom:12px}.bottom button{max-width:650px;display:block;margin:auto}.actions{grid-template-columns:repeat(4,1fr)}}@media print{.appbar,.actions,.bottom,.help,.remove{display:none}body{padding:0}.card{box-shadow:none;break-inside:avoid}}
-</style></head><body>
+</style>
+<link rel="apple-touch-icon" href="./icon-192.png">
+</head><body>
 <header class="appbar"><h1>Schizzo di Rotta</h1><p>1:25.000 · 1 mm sulla carta = 250 m</p></header><main>
 <div class="summary"><div class="stat"><b id="sumTratti">0</b><span>TRATTI</span></div><div class="stat"><b id="sumDist">0 m</b><span>DISTANZA REALE</span></div><div class="stat"><b id="sumTime">0 min</b><span>TEMPO TOTALE</span></div></div>
 <div class="actions"><button class="primary" onclick="addRow()">＋ Nuovo tratto</button><button onclick="window.print()">🖨 PDF / stampa</button><button onclick="exportCSV()">⬇ CSV</button><button class="danger" onclick="newRoute()">↺ Nuova rotta</button></div>
