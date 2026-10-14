@@ -19,7 +19,7 @@ main{max-width:650px;margin:auto;padding:12px}.summary{display:grid;grid-templat
 <header class="appbar"><h1>Schizzo di Rotta</h1><p>1:25.000 · 1 mm sulla carta = 250 m</p></header><main>
 <div class="summary"><div class="stat"><b id="sumTratti">0</b><span>TRATTI</span></div><div class="stat"><b id="sumDist">0 m</b><span>DISTANZA REALE</span></div><div class="stat"><b id="sumTime">0 min</b><span>TEMPO TOTALE</span></div></div>
 <div class="actions"><button class="primary" onclick="addRow()">＋ Nuovo tratto</button><button onclick="window.print()">🖨 PDF / stampa</button><button onclick="exportCSV()">⬇ CSV</button><button class="danger" onclick="newRoute()">↺ Nuova rotta</button></div>
-<p class="help">Compila quota di partenza, quota di arrivo, distanza sulla carta e azimut. I risultati vengono calcolati automaticamente e salvati sul dispositivo.</p><div id="rows"></div></main>
+<p class="help">Compila quota di partenza, quota di arrivo, distanza sulla carta e azimut. Tempi: salita 300 m/h, discesa 500 m/h, piano 4 km/h; per ogni tratto si prende il tempo maggiore e si aggiunge metà del minore. I calcoli restano precisi in minuti e si sommano senza arrotondare i singoli tratti.</p><div id="rows"></div></main>
 <div class="bottom"><button onclick="addRow()">＋ AGGIUNGI TRATTO</button></div>
 <script>
 const KEY="schizzo_rotta_pwa_v1";const n=v=>{const x=parseFloat(v);return Number.isFinite(x)?x:NaN};const f=(x,d=1)=>Number.isFinite(x)?x.toFixed(d):"—";
@@ -39,7 +39,11 @@ document.getElementById("rows").appendChild(w);w.querySelectorAll("input,textare
 function removeRow(b){b.closest(".card").remove();calc()}function calc(){let total=0,dist=0,idx=0;
 document.querySelectorAll(".card").forEach(c=>{idx++;c.querySelector(".num").textContent=idx;const s=n(c.querySelector(".start").value),e=n(c.querySelector(".end").value),mm=n(c.querySelector(".map").value),az=n(c.querySelector(".az").value);
 const diff=Number.isFinite(s)&&Number.isFinite(e)?e-s:NaN,plan=Number.isFinite(mm)?mm*250:NaN,real=Number.isFinite(plan)&&Number.isFinite(diff)?Math.sqrt(plan*plan+diff*diff):NaN,pct=Number.isFinite(diff)&&Number.isFinite(plan)&&plan?diff*100/plan:NaN,deg=degFromPct(pct);
-const td=Number.isFinite(real)?real/1000*15:NaN,te=Number.isFinite(diff)?Math.abs(diff)/100*20:NaN,part=Number.isFinite(td)&&Number.isFinite(te)?Math.max(td,te)+Math.min(td,te)/2:NaN;if(Number.isFinite(part))total+=part;if(Number.isFinite(real))dist+=real;
+const td=Number.isFinite(plan)?(plan/1000/4)*60:NaN;
+// Tempo verticale in minuti: salita 300 m/h, discesa 500 m/h.
+const te=Number.isFinite(diff)?(diff>=0?(diff/300)*60:(Math.abs(diff)/500)*60):NaN;
+// Regola: tempo maggiore + metà del tempo minore. Nessun arrotondamento intermedio.
+const part=Number.isFinite(td)&&Number.isFinite(te)?Math.max(td,te)+Math.min(td,te)/2:NaN;if(Number.isFinite(part))total+=part;if(Number.isFinite(real))dist+=real;
 c.querySelector(".diff").textContent=Number.isFinite(diff)?f(diff,0)+" m":"—";c.querySelector(".plan").textContent=Number.isFinite(plan)?f(plan,1)+" m":"—";c.querySelector(".real").textContent=Number.isFinite(real)?f(real,1)+" m":"—";c.querySelector(".slope").textContent=Number.isFinite(pct)?f(pct,2)+" %":"—";c.querySelector(".deg").textContent=Number.isFinite(deg)?f(deg,1)+"°":"—";c.querySelector(".recip").textContent=Number.isFinite(az)?f(reciprocal(az),0)+"°":"—";c.querySelector(".times").textContent=Number.isFinite(part)?f(part,1)+" min · "+f(total,1)+" min":"—"});document.getElementById("sumTratti").textContent=idx;document.getElementById("sumDist").textContent=f(dist,0)+" m";document.getElementById("sumTime").textContent=f(total,1)+" min";save()}
 function save(){localStorage.setItem(KEY,JSON.stringify([...document.querySelectorAll(".card")].map(c=>({start:c.querySelector(".start").value,end:c.querySelector(".end").value,map:c.querySelector(".map").value,az:c.querySelector(".az").value,desc:c.querySelector(".desc").value}))))}
 function load(){let a=[];try{a=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}if(a.length)a.forEach(addRow);else addRow()}
